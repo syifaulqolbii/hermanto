@@ -1,0 +1,124 @@
+{
+  "RapidAPI_News/rss": [
+    {
+      "title": "Fed holds rates steady, signals two cuts in 2026",
+      "pubDate": "2026-05-09T18:00:00Z",
+      "link": "https://example.com/fed-rates",
+      "description": "The Federal Reserve kept its benchmark rate unchanged and signaled two potential cuts later this year.",
+      "source": "Bloomberg"
+    },
+    {
+      "title": "Asian markets rally on easing trade tensions",
+      "pubDate": "2026-05-09T10:00:00Z",
+      "link": "https://example.com/asia-rally",
+      "description": "Stocks across Asia surged as US-China trade talks showed progress.",
+      "source": "MarketWatch"
+    },
+    {
+      "title": "Oil prices steady amid OPEC+ output decision",
+      "pubDate": "2026-05-09T08:00:00Z",
+      "link": "https://example.com/oil-opec",
+      "description": "Crude oil held near $78/barrel after OPEC+ agreed to maintain current production levels.",
+      "source": "FinancialTimes"
+    }
+  ],
+  "RapidAPI_IDX/getGlobalMarketOverview": {
+    "summary": "Global markets mixed; US equities near highs, Asia positive",
+    "sentiment": "neutral-risk-on",
+    "indices": [
+      {"name": "S&P 500", "change": 0.4},
+      {"name": "Nikkei", "change": 1.1},
+      {"name": "Hang Seng", "change": 0.8}
+    ]
+  },
+  "RapidAPI_IDX/getCommoditiesImpact": {
+    "summary": "Gold positive, coal weak, oil neutral",
+    "bias": "mixed — gold up, coal down, oil flat"
+  },
+  "RapidAPI_IDX/getForexIdrImpact": {
+    "summary": "USD/IDR stable at 16,200; exporters neutral",
+    "bias": "USD/IDR stable, exporters neutral"
+  },
+  "RapidAPI_IDX/getIndicesImpact": {
+    "summary": "IHSG likely to open flat-to-positive following Asia rally",
+    "ihsg_prediction": "flat-to-positive, following Asia rally"
+  },
+  "RapidAPI_IDX/getSectorRotation": {
+    "marketPhase": "early expansion",
+    "sectors": [
+      {"sector": "Healthcare", "sectorId": "5", "status": "Leading", "momentumScore": 78, "foreignFlow": 12.5, "avgReturnToday": 1.2, "recommendation": "Overweight"},
+      {"sector": "Technology", "sectorId": "9", "status": "Improving", "momentumScore": 65, "foreignFlow": 8.0, "avgReturnToday": 0.8, "recommendation": "Overweight"},
+      {"sector": "Consumer", "sectorId": "3", "status": "Improving", "momentumScore": 58, "foreignFlow": 3.0, "avgReturnToday": 0.5, "recommendation": "Neutral"},
+      {"sector": "Banking", "sectorId": "7", "status": "Weakening", "momentumScore": 42, "foreignFlow": -5.0, "avgReturnToday": -0.3, "recommendation": "Underweight"},
+      {"sector": "Energy", "sectorId": "1", "status": "Lagging", "momentumScore": 30, "foreignFlow": -8.0, "avgReturnToday": -0.7, "recommendation": "Underweight"}
+    ]
+  },
+  "RapidAPI_IDX/getMarketMover/top-value": {
+    "data": [
+      {"symbol": "BBCA", "name": "Bank Central Asia", "price": 9500, "changePercent": 0.5, "value": 850000000000},
+      {"symbol": "TLKM", "name": "Telkom Indonesia", "price": 3200, "changePercent": 1.2, "value": 620000000000},
+      {"symbol": "HEAL", "name": "Medikaloka Hermina", "price": 1850, "changePercent": 2.1, "value": 410000000000},
+      {"symbol": "GOTO", "name": "GoTo Gojek Tokopedia", "price": 88, "changePercent": 3.4, "value": 380000000000},
+      {"symbol": "BMRI", "name": "Bank Mandiri", "price": 6200, "changePercent": 0.3, "value": 350000000000}
+    ]
+  },
+  "RapidAPI_IDX/getMarketMover/net-foreign-buy": {
+    "data": [
+      {"symbol": "HEAL", "name": "Medikaloka Hermina", "price": 1850, "changePercent": 2.1, "value": 45000000000},
+      {"symbol": "GOTO", "name": "GoTo Gojek Tokopedia", "price": 88, "changePercent": 3.4, "value": 38000000000},
+      {"symbol": "TLKM", "name": "Telkom Indonesia", "price": 3200, "changePercent": 1.2, "value": 22000000000}
+    ]
+  },
+  "RapidAPI_IDX/getTrendingStocks": {
+    "stocks": [
+      {"symbol": "HEAL", "name": "Medikaloka Hermina", "price": 1850, "changePercent": 2.1},
+      {"symbol": "GOTO", "name": "GoTo Gojek Tokopedia", "price": 88, "changePercent": 3.4},
+      {"symbol": "TLKM", "name": "Telkom Indonesia", "price": 3200, "changePercent": 1.2}
+    ]
+  },
+  "RapidAPI_IDX/getTechnicalAnalysis": {
+    "signal": "BUY",
+    "overallSignal": "BUY",
+    "trend": "UPTREND",
+    "support": 1750,
+    "resistance": 2000
+  },
+  "RapidAPI_IDX/calculateRiskReward": {
+    "riskRewardRatio": 2.5,
+    "stopLoss": 1750,
+    "target1": 2000,
+    "target2": 2200
+  },
+  "RapidAPI_IDX/getSmartMoneyFlow": {
+    "signal": "ACCUMULATING",
+    "trend": "ACCUMULATING",
+    "summary": "Smart money net buying over last 5 sessions"
+  },
+  "RapidAPI_IDX/getBandarAccumulation": {
+    "signal": "ACCUMULATING",
+    "accumulationScore": 72,
+    "summary": "Bandar accumulation detected — broker concentration rising"
+  },
+  "RapidAPI_IDX/getBandarDistribution": {
+    "signal": "NEUTRAL",
+    "distributionScore": 25,
+    "summary": "No significant distribution detected"
+  },
+  "RapidAPI_IDX/getRetailBandarSentiment": {
+    "divergence": "RETAIL_PANIC_BANDAR_ACCUMULATE",
+    "pattern": "RETAIL_PANIC_BANDAR_ACCUMULATE"
+  },
+  "RapidAPI_IDX/getWhaleTransactions": {
+    "summary": "2 LARGE_WHALE buy transactions detected today",
+    "prediction": "Short-term bullish with 70% confidence"
+  },
+  "RapidAPI_IDX/getBrokerSummary": {
+    "summary": "Top net buyer: YU (+12.5B), Top net seller: DH (-3.2B)",
+    "topBrokers": [{"broker": "YU", "net": 12500000000}, {"broker": "DH", "net": -3200000000}]
+  },
+  "RapidAPI_IDX/getPumpDumpDetection": {
+    "riskLevel": "LOW",
+    "risk": "LOW",
+    "summary": "No pump & dump pattern detected"
+  }
+}

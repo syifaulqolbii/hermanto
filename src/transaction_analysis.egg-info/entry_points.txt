@@ -1,0 +1,2 @@
+[console_scripts]
+ta = transaction_analysis.cli:cli
