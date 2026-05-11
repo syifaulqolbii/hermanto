@@ -330,21 +330,21 @@ class Pipeline:
                 # stop loss = stop_loss_recommended
                 stop = float(rr.get("stop_loss_recommended", rr.get("stop_loss", rr.get("stopLoss", rr.get("recommendedStopLoss", 0)))) or 0)
 
-                # target_prices is list of dicts with "level" field, sorted by RR descending
+                # target_prices: sort by level ascending (nearest first = TP1, further = TP2)
                 targets = rr.get("target_prices", rr.get("targets", rr.get("targetPrices", [])))
                 tp1 = tp2 = 0.0
                 if isinstance(targets, list) and targets:
                     def _level(t: dict) -> float:
                         return float(t.get("level", t.get("price", t.get("target", 0))) or 0)
-                    # sort by RR descending, take best two
-                    sorted_targets = sorted(targets, key=lambda t: float(t.get("risk_reward", t.get("risk_reward_ratio", 0)) or 0), reverse=True)
+                    above_entry = [t for t in targets if _level(t) > entry]
+                    sorted_targets = sorted(above_entry, key=_level)
                     tp1 = _level(sorted_targets[0]) if sorted_targets else 0.0
                     tp2 = _level(sorted_targets[1]) if len(sorted_targets) > 1 else tp1
                 else:
                     tp1 = float(rr.get("target1", rr.get("take_profit_1", rr.get("takeProfit1", 0))) or 0)
                     tp2 = float(rr.get("target2", rr.get("take_profit_2", rr.get("takeProfit2", tp1))) or 0)
 
-                # RR from best target
+                # RR from best target (highest RR in list)
                 rr_val = float(rr.get("risk_reward_ratio", rr.get("riskRewardRatio", 1.0)) or 1.0)
                 c.risk_reward_score = normalize_score(rr_val, 0, 10)
                 c.trade_risk_reward_ratio = rr_val
@@ -353,19 +353,15 @@ class Pipeline:
                 c.take_profit_1 = tp1
                 c.take_profit_2 = tp2
 
-                # entry zone: support levels bracket current price
+                # entry zone: low = nearest support below entry, high = entry + small buffer (not up to TP)
                 supports = rr.get("support_levels", [])
-                resistances = rr.get("resistance_levels", [])
                 if entry and supports:
                     below = [s for s in supports if float(s or 0) < entry]
                     c.entry_zone_low = float(max(below)) if below else stop
                 else:
                     c.entry_zone_low = stop
-                if entry and resistances:
-                    above = [r for r in resistances if float(r or 0) > entry]
-                    c.entry_zone_high = float(min(above)) if above else entry * 1.01
-                else:
-                    c.entry_zone_high = entry * 1.01 if entry else 0.0
+                # entry zone high = entry price + 1% buffer (area beli, bukan target)
+                c.entry_zone_high = round(entry * 1.01) if entry else 0.0
 
                 # position sizing from API
                 pos = rr.get("position_sizing", {})
