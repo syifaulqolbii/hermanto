@@ -298,37 +298,81 @@ class Pipeline:
                 else:
                     signal = raw_signal
                 c.technical_score = score_from_signal(signal)
-                if not c.entry_price:
-                    resistance = float(tech.get("resistance", tech.get("nearest_resistance", tech.get("nearestResistance", 0))) or 0)
-                    support = float(tech.get("support", tech.get("nearest_support", tech.get("nearestSupport", 0))) or 0)
-                    if support and resistance:
-                        c.entry_price = resistance
-                        c.entry_zone_low = support
-                        c.entry_zone_high = resistance
-            if rr:
-                rr_val = rr.get("riskRewardRatio", rr.get("risk_reward_ratio", rr.get("risk_reward_ratio_value", 1.0))) or 1.0
-                c.risk_reward_score = normalize_score(float(rr_val), 0, 5)
-                c.trade_risk_reward_ratio = float(rr_val)
-
-                entry = rr.get("entry_price", rr.get("entryPrice", rr.get("current_price", rr.get("currentPrice", rr.get("price", 0))))) or 0
-                stop = rr.get("stop_loss", rr.get("stopLoss", rr.get("recommended_stop_loss", rr.get("recommendedStopLoss", 0)))) or 0
-                targets = rr.get("targets", rr.get("target_prices", rr.get("targetPrices", [])))
-                if isinstance(targets, list) and targets:
-                    first = targets[0]
-                    second = targets[1] if len(targets) > 1 else targets[0]
-                    c.take_profit_1 = float(first.get("price", first.get("target", first)) if isinstance(first, dict) else first or 0)
-                    c.take_profit_2 = float(second.get("price", second.get("target", second)) if isinstance(second, dict) else second or 0)
+                # support/resistance dari nested supportResistance atau flat
+                sr = tech.get("supportResistance", {})
+                if isinstance(sr, dict):
+                    supports = [s.get("level", 0) for s in sr.get("supports", []) if isinstance(s, dict)]
+                    resistances = [r.get("level", 0) for r in sr.get("resistances", []) if isinstance(r, dict)]
                 else:
-                    c.take_profit_1 = float(rr.get("take_profit_1", rr.get("takeProfit1", rr.get("target_price_1", rr.get("targetPrice1", rr.get("target1", 0))))) or 0)
-                    c.take_profit_2 = float(rr.get("take_profit_2", rr.get("takeProfit2", rr.get("target_price_2", rr.get("targetPrice2", rr.get("target2", c.take_profit_1))))) or 0)
+                    supports = []
+                    resistances = []
+                # fallback ke flat fields
+                if not supports:
+                    s_val = tech.get("support", tech.get("nearest_support", 0))
+                    if s_val:
+                        supports = [float(s_val)]
+                if not resistances:
+                    r_val = tech.get("resistance", tech.get("nearest_resistance", 0))
+                    if r_val:
+                        resistances = [float(r_val)]
+                # hanya set dari tech jika rr belum mengisi entry
+                if not c.entry_price and supports and resistances:
+                    last_price = float(tech.get("lastPrice", tech.get("last_price", 0)) or 0)
+                    if last_price:
+                        below = [s for s in supports if float(s or 0) < last_price]
+                        above = [r for r in resistances if float(r or 0) > last_price]
+                        c.entry_price = last_price
+                        c.entry_zone_low = float(max(below)) if below else last_price * 0.98
+                        c.entry_zone_high = float(min(above)) if above else last_price * 1.02
+            if rr:
+                # entry = current_price from API
+                entry = float(rr.get("current_price", rr.get("currentPrice", rr.get("entry_price", rr.get("entryPrice", 0)))) or 0)
+                # stop loss = stop_loss_recommended
+                stop = float(rr.get("stop_loss_recommended", rr.get("stop_loss", rr.get("stopLoss", rr.get("recommendedStopLoss", 0)))) or 0)
 
-                c.entry_price = float(entry)
-                c.stop_loss = float(stop)
-                if c.entry_price:
-                    c.entry_zone_low = float(rr.get("entry_zone_low", rr.get("entryZoneLow", c.entry_price * 0.98)) or 0)
-                    c.entry_zone_high = float(rr.get("entry_zone_high", rr.get("entryZoneHigh", c.entry_price * 1.01)) or 0)
-                c.position_size_lots = float(rr.get("position_size_lots", rr.get("positionSizeLots", rr.get("recommended_lots", 0))) or 0)
-                if c.entry_price and c.stop_loss and c.take_profit_1:
+                # target_prices is list of dicts with "level" field, sorted by RR descending
+                targets = rr.get("target_prices", rr.get("targets", rr.get("targetPrices", [])))
+                tp1 = tp2 = 0.0
+                if isinstance(targets, list) and targets:
+                    def _level(t: dict) -> float:
+                        return float(t.get("level", t.get("price", t.get("target", 0))) or 0)
+                    # sort by RR descending, take best two
+                    sorted_targets = sorted(targets, key=lambda t: float(t.get("risk_reward", t.get("risk_reward_ratio", 0)) or 0), reverse=True)
+                    tp1 = _level(sorted_targets[0]) if sorted_targets else 0.0
+                    tp2 = _level(sorted_targets[1]) if len(sorted_targets) > 1 else tp1
+                else:
+                    tp1 = float(rr.get("target1", rr.get("take_profit_1", rr.get("takeProfit1", 0))) or 0)
+                    tp2 = float(rr.get("target2", rr.get("take_profit_2", rr.get("takeProfit2", tp1))) or 0)
+
+                # RR from best target
+                rr_val = float(rr.get("risk_reward_ratio", rr.get("riskRewardRatio", 1.0)) or 1.0)
+                c.risk_reward_score = normalize_score(rr_val, 0, 10)
+                c.trade_risk_reward_ratio = rr_val
+                c.entry_price = entry
+                c.stop_loss = stop
+                c.take_profit_1 = tp1
+                c.take_profit_2 = tp2
+
+                # entry zone: support levels bracket current price
+                supports = rr.get("support_levels", [])
+                resistances = rr.get("resistance_levels", [])
+                if entry and supports:
+                    below = [s for s in supports if float(s or 0) < entry]
+                    c.entry_zone_low = float(max(below)) if below else stop
+                else:
+                    c.entry_zone_low = stop
+                if entry and resistances:
+                    above = [r for r in resistances if float(r or 0) > entry]
+                    c.entry_zone_high = float(min(above)) if above else entry * 1.01
+                else:
+                    c.entry_zone_high = entry * 1.01 if entry else 0.0
+
+                # position sizing from API
+                pos = rr.get("position_sizing", {})
+                if isinstance(pos, dict):
+                    c.position_size_lots = float(pos.get("suggested_shares", pos.get("suggestedShares", 0)) or 0)
+
+                if entry and stop and tp1:
                     c.trade_plan_summary = "Buy on pullback/breakout confirmation within entry zone; invalidate below stop loss."
         return sorted(top, key=lambda c: c.technical_score + c.risk_reward_score, reverse=True)
 

@@ -77,17 +77,29 @@
     ]
   },
   "RapidAPI_IDX/getTechnicalAnalysis": {
-    "signal": "BUY",
-    "overallSignal": "BUY",
-    "trend": "UPTREND",
-    "support": 1750,
-    "resistance": 2000
+    "symbol": "HEAL",
+    "lastPrice": 1005,
+    "signal": {"action": "BUY", "confidence": 60, "reasons": ["RSI oversold"]},
+    "trend": {"shortTerm": "BEARISH", "overallTrend": "STRONG_BEARISH", "trendStrength": 0},
+    "supportResistance": {
+      "supports": [{"level": 990, "strength": "WEAK"}, {"level": 911, "strength": "MODERATE"}],
+      "resistances": [{"level": 1177, "strength": "MODERATE"}, {"level": 1255, "strength": "WEAK"}],
+      "pivotPoint": 1083
+    }
   },
   "RapidAPI_IDX/calculateRiskReward": {
-    "riskRewardRatio": 2.5,
-    "stopLoss": 1750,
-    "target1": 2000,
-    "target2": 2200
+    "current_price": 1005,
+    "stop_loss_recommended": 970,
+    "support_levels": [990],
+    "resistance_levels": [1255],
+    "risk_reward_ratio": 7.14,
+    "target_prices": [
+      {"level": 1255, "probability": 75, "reward": 24.88, "risk_reward": 7.14},
+      {"level": 1093, "probability": 55, "reward": 8.76, "risk_reward": 2.51},
+      {"level": 1145, "probability": 35, "reward": 13.93, "risk_reward": 4.0}
+    ],
+    "recommendation": "EXCELLENT_SETUP",
+    "position_sizing": {"max_position_percent": 20, "suggested_shares": 57142, "total_investment": "Rp 57.43 M", "max_loss": "Rp 2.00 M"}
   },
   "RapidAPI_IDX/getSmartMoneyFlow": {
     "signal": "ACCUMULATING",
